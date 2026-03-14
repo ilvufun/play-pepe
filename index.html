@@ -1123,7 +1123,7 @@ const state = {
     this.lives--; player.invincible = 120; sfxHit();
     for (let i=0; i<12; i++) this.particles.push(new Particle(player.x+16, player.y-24, '#ef4444'));
     if (this.lives <= 0) {
-      musicStop(); sfxDie(); this.mode='gameover'; sfxFinnish();
+      musicStop(); sfxDie(); this.mode='gameover';
       saveScore(playerName, this.score);
       this.leaderboardCache = [];
       loadTopScores().then(scores => { state.leaderboardCache = scores; });
