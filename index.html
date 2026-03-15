@@ -69,7 +69,7 @@
   }
   #name-overlay {
     position: fixed;
-    inset: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     display: none;
     align-items: center;
     justify-content: center;
@@ -77,6 +77,25 @@
     background: rgba(0,0,0,0.65);
   }
   #name-overlay.active { display: flex; }
+  #name-overlay.portrait {
+    transform: rotate(-90deg);
+    /* Swap dimensions so the rotated overlay still covers the full screen */
+    width: 100vh;
+    height: 100vw;
+    top: calc(50% - 50vw);
+    left: calc(50% - 50vh);
+    right: unset; bottom: unset;
+  }
+  #name-overlay.portrait #name-box {
+    /* In the rotated context vw/vh still refer to real viewport.
+       CSS width → visual height; CSS height → visual width.
+       Cap CSS height to 80vw so visual width fits the phone screen. */
+    width: min(82vh, 380px);
+    max-width: min(82vh, 380px);
+    min-width: unset;
+    max-height: 78vw;
+    overflow-y: auto;
+  }
   #name-box {
     background: linear-gradient(160deg, #0d1b2a, #0a1520);
     border: 2px solid #4ade80;
@@ -160,7 +179,7 @@
     <button class="ctrl-btn" id="btn-arms">CRY</button>
     <button class="ctrl-btn" id="btn-kick">KICK</button>
   </div>
-  <div id="kb-hint">SPACE/↑ Jump &nbsp;|&nbsp; ↓/S Slide &nbsp;|&nbsp; A Cry &nbsp;|&nbsp; D Kick &nbsp;|&nbsp; Swipe on canvas</div>
+  <div id="kb-hint">Swipe ↑ Jump &nbsp;|&nbsp; Swipe ↓ Slide &nbsp;|&nbsp; Swipe ← Cry &nbsp;|&nbsp; Swipe → Kick</div>
 </div>
 
 <div id="name-overlay">
@@ -204,6 +223,7 @@ function resizeCanvas() {
   canvas.style.height = cssH + 'px';
   wrap.style.width    = cssW + 'px';
 
+  const overlay = document.getElementById('name-overlay');
   if (portrait) {
     const totalH = cssH + btnH + hintH + gap;
     // Place wrap so its centre aligns with screen centre, then rotate -90°
@@ -214,12 +234,14 @@ function resizeCanvas() {
     wrap.style.top             = top  + 'px';
     wrap.style.transform       = 'rotate(-90deg)';
     wrap.style.transformOrigin = 'center center';
+    overlay.classList.add('portrait');
   } else {
     wrap.style.position        = '';
     wrap.style.left            = '';
     wrap.style.top             = '';
     wrap.style.transform       = '';
     wrap.style.transformOrigin = '';
+    overlay.classList.remove('portrait');
   }
 }
 window.addEventListener('resize', resizeCanvas);
@@ -1442,12 +1464,12 @@ function drawTitle() {
   ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(W/2-160, 188); ctx.lineTo(W/2+160, 188); ctx.stroke();
 
-  // ── Instructions (two-column: key | description) ──────────────────────────
+  // ── Instructions (two-column: gesture | description) ─────────────────────
   const rows = [
-    { key: 'SPACE / UP',  col: '#4ade80', desc: 'Jump — header the ball, avoid slide tackles' },
-    { key: 'DOWN / S',    col: '#fb923c', desc: 'Slide — tackle opponents dribbling the ball' },
-    { key: 'A / CRY',     col: '#c084fc', desc: 'Cry — only way to handle the referee!' },
-    { key: 'D / KICK',    col: '#f472b6', desc: 'Kick — boot the injured opponent on the ground' },
+    { key: 'SWIPE UP',    col: '#4ade80', desc: 'Jump — header the ball, avoid slide tackles' },
+    { key: 'SWIPE DOWN',  col: '#fb923c', desc: 'Slide — tackle opponents dribbling the ball' },
+    { key: 'SWIPE LEFT',  col: '#c084fc', desc: 'Cry — only way to handle the referee!' },
+    { key: 'SWIPE RIGHT', col: '#f472b6', desc: 'Kick — boot the injured opponent on the ground' },
   ];
   rows.forEach((r, i) => {
     const ry = 210 + i * 23;
@@ -1494,8 +1516,8 @@ function drawTitle() {
   ctx.globalAlpha = 0.65 + Math.sin(state.frame * 0.07) * 0.35;
   ctx.font = 'bold 17px Arial, sans-serif';
   ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 2;
-  ctx.strokeText('TAP  ·  PRESS SPACE  ·  PLAY', W/2, 352);
-  ctx.fillStyle = '#fff'; ctx.fillText('TAP  ·  PRESS SPACE  ·  PLAY', W/2, 352);
+  ctx.strokeText('TAP TO PLAY', W/2, 352);
+  ctx.fillStyle = '#fff'; ctx.fillText('TAP TO PLAY', W/2, 352);
   ctx.globalAlpha = 1;
 }
 
